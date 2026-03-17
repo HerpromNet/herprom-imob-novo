@@ -3,6 +3,7 @@
 import DashboardShell from "@/components/layout/DashboardShell";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import PropertyFormModal from "@/components/properties/PropertyFormModal";
 import { 
     Home, 
     Search, 
@@ -36,31 +37,32 @@ export default function PropertiesPage() {
     const [properties, setProperties] = useState<Property[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
+    const [isAppModalOpen, setAppModalOpen] = useState(false);
+
+    const fetchProperties = async () => {
+        setIsLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('properties')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            if (data) setProperties(data);
+        } catch (err) {
+            console.error("Error fetching properties:", err);
+            // Fallback fictício Premium
+            setProperties([
+                { id: '1', title: 'Cobertura Duplex no Itaim', address: 'Rua Amauri, Itaim Bibi - SP', price: 'R$ 4.500.000', bedrooms: 4, bathrooms: 5, area: 320, type: 'Apartamento', status: 'Venda' },
+                { id: '2', title: 'Casa de Condomínio Alpha 1', address: 'Alphaville, Barueri - SP', price: 'R$ 7.200.000', bedrooms: 5, bathrooms: 7, area: 650, type: 'Casa', status: 'Venda' },
+                { id: '3', title: 'Flat Design Moema', address: 'Av. Lavandisca, Moema - SP', price: 'R$ 8.500 /mês', bedrooms: 1, bathrooms: 1, area: 45, type: 'Flat', status: 'Aluguel' },
+            ]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchProperties = async () => {
-            setIsLoading(true);
-            try {
-                const { data, error } = await supabase
-                    .from('properties')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-                if (data) setProperties(data);
-            } catch (err) {
-                console.error("Error fetching properties:", err);
-                // Fallback fictício Premium
-                setProperties([
-                    { id: '1', title: 'Cobertura Duplex no Itaim', address: 'Rua Amauri, Itaim Bibi - SP', price: 'R$ 4.500.000', bedrooms: 4, bathrooms: 5, area: 320, type: 'Apartamento', status: 'Venda' },
-                    { id: '2', title: 'Casa de Condomínio Alpha 1', address: 'Alphaville, Barueri - SP', price: 'R$ 7.200.000', bedrooms: 5, bathrooms: 7, area: 650, type: 'Casa', status: 'Venda' },
-                    { id: '3', title: 'Flat Design Moema', address: 'Av. Lavandisca, Moema - SP', price: 'R$ 8.500 /mês', bedrooms: 1, bathrooms: 1, area: 45, type: 'Flat', status: 'Aluguel' },
-                ]);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         fetchProperties();
     }, []);
 
@@ -79,10 +81,21 @@ export default function PropertiesPage() {
                         </h1>
                         <p className="text-gray-400 mt-1">Gerencie seu portfólio de imóveis de luxo.</p>
                     </div>
-                    <button className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 rounded-xl font-bold transition-all shadow-lg shadow-primary/25">
+                    <button 
+                        onClick={() => setAppModalOpen(true)}
+                        className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 rounded-xl font-bold transition-all shadow-lg shadow-primary/25"
+                    >
                         <Plus size={20} /> Cadastrar Imóvel
                     </button>
                 </header>
+                <PropertyFormModal 
+                    isOpen={isAppModalOpen} 
+                    onClose={() => setAppModalOpen(false)} 
+                    onSuccess={() => {
+                        setAppModalOpen(false);
+                        fetchProperties();
+                    }} 
+                />
 
                 <div className="flex flex-col md:flex-row gap-4 mb-8">
                     <div className="relative flex-1">

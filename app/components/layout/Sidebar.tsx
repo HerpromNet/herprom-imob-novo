@@ -12,7 +12,8 @@ import {
     LogOut,
     Menu,
     X,
-    ShieldCheck
+    ShieldCheck,
+    CreditCard
 } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -25,6 +26,7 @@ const menuItems = [
     { icon: Users, label: "Leads", href: "/dashboard/leads" },
     { icon: Home, label: "Imóveis", href: "/dashboard/properties" },
     { icon: TrendingUp, label: "Ganhos", href: "/dashboard/earnings" },
+    { icon: CreditCard, label: "Assinatura", href: "/dashboard/subscription" },
 ];
 
 export default function Sidebar() {

@@ -2,6 +2,7 @@
 
 import DashboardShell from "@/components/layout/DashboardShell";
 import { useAuth } from "@/lib/authService";
+import WelcomeModal from "@/components/ui/WelcomeModal";
 import { 
     Users, 
     Home, 
@@ -13,6 +14,7 @@ import {
     MessageSquare
 } from "lucide-react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 const stats = [
     { label: "Leads Ativos", value: "12", icon: Users, color: "text-blue-500", bg: "bg-blue-500/10" },
@@ -25,6 +27,7 @@ export default function DashboardPage() {
 
     return (
         <DashboardShell>
+            <WelcomeModal userName={profile?.name?.split(" ")[0] || "Corretor"} />
             <div className="space-y-8">
                 <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <motion.div 

@@ -127,12 +127,18 @@ function LoginForm() {
                 </button>
             </form>
 
-            <div className="mt-8 text-center pt-6 border-t border-white/5">
+            <div className="mt-8 text-center pt-6 border-t border-white/5 space-y-4">
                 <p className="text-sm text-gray-400">
                     Ainda não tem conta?{" "}
                     <Link href="/auth/signup" className="text-primary font-bold hover:underline">
                         Criar conta
                     </Link>
+                </p>
+                <p className="text-[10px] text-gray-500 max-w-xs mx-auto">
+                    Ao continuar, você concorda com nossos{" "}
+                    <Link href="/legal/terms" className="hover:text-white underline underline-offset-2 transition-colors">Termos de Uso</Link> 
+                    {" "}e{" "}
+                    <Link href="/legal/privacy" className="hover:text-white underline underline-offset-2 transition-colors">Política de Privacidade</Link>.
                 </p>
             </div>
         </div>

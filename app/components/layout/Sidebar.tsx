@@ -11,11 +11,13 @@ import {
     Settings,
     LogOut,
     Menu,
-    X
+    X,
+    ShieldCheck
 } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { signOut } from "@/lib/authService";
+import { useAuth, signOut } from "@/lib/authService";
+import { PlanType } from "@/lib/types";
 
 const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
@@ -28,11 +30,14 @@ const menuItems = [
 export default function Sidebar() {
     const pathname = usePathname();
     const [isOpen, setIsOpen] = useState(true);
+    const { profile } = useAuth();
 
     const handleLogout = async () => {
         await signOut();
         window.location.reload();
     };
+
+    const isAdmin = profile?.plan === PlanType.MASTER_ADMIN || profile?.isAdmin;
 
     return (
         <aside className={`relative h-screen transition-all duration-300 ${isOpen ? "w-64" : "w-20"} flex flex-col glass border-r border-white/10 z-50`}>
@@ -73,6 +78,17 @@ export default function Sidebar() {
                         </Link>
                     );
                 })}
+
+                {isAdmin && (
+                    <Link 
+                        href="/dashboard/admin"
+                        className={`flex items-center gap-4 p-3 rounded-xl transition-all duration-300 group
+                            ${pathname === "/dashboard/admin" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25" : "text-indigo-400 hover:bg-indigo-500/10 hover:text-indigo-300"}`}
+                    >
+                        <ShieldCheck size={22} className={`${pathname === "/dashboard/admin" ? "text-white" : "group-hover:scale-110 transition-transform"}`} />
+                        {isOpen && <span className="font-bold uppercase tracking-tight text-xs">Painel Master Admin</span>}
+                    </Link>
+                )}
             </nav>
 
             <div className="p-4 border-t border-white/5 space-y-2">

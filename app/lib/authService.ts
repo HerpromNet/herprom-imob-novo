@@ -82,6 +82,18 @@ export const signOut = async (): Promise<{ error: Error | null }> => {
     }
 };
 
+export const resetPassword = async (email: string): Promise<{ error: Error | null }> => {
+    try {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/auth/login?reset=true`,
+        });
+        if (error) throw error;
+        return { error: null };
+    } catch (error) {
+        return { error: error as Error };
+    }
+};
+
 export const getCurrentUser = async (): Promise<{ user: AuthUser | null; error: Error | null }> => {
     try {
         const { data: { user }, error } = await supabase.auth.getUser();

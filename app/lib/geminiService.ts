@@ -97,7 +97,7 @@ const callGeminiAPI = async (prompt: string, systemInstruction: string = "", his
 };
 
 export const chatWithAI = async (message: string, history: any[]) => {
-    const systemInstruction = `Você é a Sofia, assistente sênior do Herprom Broker. Use emojis 🏡✨. Seja direta e criativa.`;
+    const systemInstruction = `Você é a Sofia, assistente sênior do CRM FOR BROKER. Use emojis 🏡✨. Seja direta e criativa.`;
     try {
         return await callGeminiAPI(message, systemInstruction, history);
     } catch (error: any) {

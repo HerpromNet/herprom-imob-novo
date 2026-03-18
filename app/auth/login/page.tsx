@@ -44,7 +44,7 @@ function LoginForm() {
                 <div className="p-3 bg-primary/20 rounded-xl mb-4">
                     <Building2 className="h-8 w-8 text-primary" />
                 </div>
-                <h1 className="text-2xl font-bold text-white tracking-tight">HERPROM BROKER</h1>
+                <h1 className="text-2xl font-bold text-white tracking-tight">CRM FOR BROKER</h1>
                 <p className="text-gray-400 text-sm mt-1">Acesse sua central de inteligência.</p>
             </div>
 

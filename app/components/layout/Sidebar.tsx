@@ -52,8 +52,8 @@ export default function Sidebar() {
                             exit={{ opacity: 0, x: -20 }}
                             className="flex items-center gap-3"
                         >
-                            <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center font-bold">H</div>
-                            <span className="font-bold tracking-tight text-xl">HERPROM</span>
+                            <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center font-bold">C</div>
+                            <span className="font-bold tracking-tight text-xl">CRM FOR BROKER</span>
                         </motion.div>
                     )}
                 </AnimatePresence>

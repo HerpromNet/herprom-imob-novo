@@ -61,7 +61,7 @@ export default function WelcomeModal({ userName }: { userName: string }) {
                                         Bem-vindo(a), {userName}! 👋
                                     </h2>
                                     <p className="text-gray-400 text-lg">
-                                        Eu sou a Sofia AI, e estou aqui para ser sua Parceira de Negócios.
+                                        Eu sou a Sofia AI, e estou aqui para ser sua Parceira de Negócios no CRM FOR BROKER.
                                     </p>
                                 </div>
 

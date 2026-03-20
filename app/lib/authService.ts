@@ -159,15 +159,25 @@ export const useAuth = () => {
         initAuth();
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            if (session?.user) {
-                setUser({ id: session.user.id, email: session.user.email! });
-                const { profile: userProfile } = await getUserProfile(session.user.id);
-                if (userProfile) setProfile(userProfile);
-            } else {
-                setUser(null);
-                setProfile(null);
+            console.log(`🔵 [Auth] Evento: ${event}`, session?.user?.email);
+            try {
+                if (session?.user) {
+                    setUser({ id: session.user.id, email: session.user.email! });
+                    const { profile: userProfile, error: profileError } = await getUserProfile(session.user.id);
+                    if (userProfile) {
+                        setProfile(userProfile);
+                    } else if (profileError) {
+                        console.error('❌ [Auth] Erro ao carregar perfil:', profileError);
+                    }
+                } else {
+                    setUser(null);
+                    setProfile(null);
+                }
+            } catch (err) {
+                console.error('❌ [Auth] Erro crítico no handler:', err);
+            } finally {
+                setIsLoading(false);
             }
-            setIsLoading(false);
         });
 
         return () => subscription.unsubscribe();

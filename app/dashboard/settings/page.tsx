@@ -16,7 +16,7 @@ import {
     CheckCircle2,
     Trash2
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function SettingsPage() {
     const { profile, user } = useAuth();

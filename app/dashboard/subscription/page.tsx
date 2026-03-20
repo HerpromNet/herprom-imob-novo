@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import DashboardShell from "@/components/layout/DashboardShell";
+import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/lib/authService";
 import { PlanType } from "@/lib/types";
 import { 
@@ -10,7 +12,8 @@ import {
     ShieldCheck, 
     Infinity as InfinityIcon, 
     Target,
-    Zap
+    Zap,
+    Loader2
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -20,8 +23,36 @@ export default function SubscriptionPage() {
     // Check if user is already PRO or ADMIN
     const isPro = profile?.plan === PlanType.PRO || profile?.plan === PlanType.MASTER_ADMIN;
     const isTrial = profile?.plan === PlanType.TRIAL;
+    
+    const [isLoading, setIsLoading] = useState(false);
 
-    const MOCK_CHECKOUT_URL = "https://mpago.la/2example"; // Substituir com link real do MP
+    const handleCheckout = async () => {
+        if (!profile?.id || !profile?.email) return;
+        setIsLoading(true);
+        try {
+            const { data, error } = await supabase.functions.invoke('create-checkout', {
+                body: {
+                    user_id: profile.id,
+                    email: profile.email,
+                    title: 'Elite Broker PRO - Asisnatura',
+                    price: 97.00
+                }
+            });
+
+            if (error) throw error;
+            if (data?.init_point) {
+                // Redireciona para o checkout gerado pelo MP para esse lead!
+                window.location.href = data.init_point;
+            } else {
+                throw new Error("Link não gerado pela API");
+            }
+        } catch (err: any) {
+            console.error("Erro ao gerar checkout:", err);
+            alert("Erro ao iniciar pagamento. Verifique se o backend está configurado.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <DashboardShell>
@@ -157,15 +188,14 @@ export default function SubscriptionPage() {
                                                 Garantido por 12 meses
                                             </p>
 
-                                            <a 
-                                                href={MOCK_CHECKOUT_URL}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-primary/25 hover:scale-[1.02] flex items-center justify-center gap-2"
+                                            <button 
+                                                onClick={handleCheckout}
+                                                disabled={isLoading}
+                                                className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-primary/25 hover:scale-[1.02] flex items-center justify-center gap-2 disabled:opacity-75 disabled:hover:scale-100"
                                             >
-                                                <Target size={18} />
-                                                Fazer Upgrade Agora
-                                            </a>
+                                                {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Target size={18} />}
+                                                {isLoading ? "Gerando Pagamento Seguro..." : "Fazer Upgrade Agora"}
+                                            </button>
                                             <p className="text-[10px] text-gray-500 mt-4">
                                                 Cancele quando quiser.
                                             </p>

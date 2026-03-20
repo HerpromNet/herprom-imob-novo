@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/lib/authService";
 import { 
@@ -22,9 +22,10 @@ interface PropertyFormModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess: () => void;
+    initialData?: any | null;
 }
 
-export default function PropertyFormModal({ isOpen, onClose, onSuccess }: PropertyFormModalProps) {
+export default function PropertyFormModal({ isOpen, onClose, onSuccess, initialData }: PropertyFormModalProps) {
     const { profile } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -41,6 +42,34 @@ export default function PropertyFormModal({ isOpen, onClose, onSuccess }: Proper
     const [status, setStatus] = useState("Venda");
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (isOpen) {
+            if (initialData) {
+                setTitle(initialData.title || "");
+                setAddress(initialData.address || "");
+                setPrice(initialData.price || "");
+                setBedrooms(initialData.bedrooms?.toString() || "1");
+                setBathrooms(initialData.bathrooms?.toString() || "1");
+                setArea(initialData.area?.toString() || "50");
+                setType(initialData.type || "Apartamento");
+                setStatus(initialData.status || "Venda");
+                setImagePreview(initialData.image_url || null);
+            } else {
+                setTitle("");
+                setAddress("");
+                setPrice("");
+                setBedrooms("1");
+                setBathrooms("1");
+                setArea("50");
+                setType("Apartamento");
+                setStatus("Venda");
+                setImagePreview(null);
+            }
+            setImageFile(null);
+            setError(null);
+        }
+    }, [initialData, isOpen]);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -82,18 +111,16 @@ export default function PropertyFormModal({ isOpen, onClose, onSuccess }: Proper
         try {
             if (!profile?.id) throw new Error("Usuário não autenticado");
 
-            let imageUrl = null;
+            let imageUrl = initialData?.image_url || null;
             if (imageFile) {
                 try {
                     imageUrl = await uploadImage(imageFile);
                 } catch (imgError: any) {
                     console.error("Upload failed layout fallback will be used.", imgError);
-                    // Opcionalmente, pode falhar o cadastro se a imagem for obrigatória
-                    // throw imgError; 
                 }
             }
 
-            const newProperty = {
+            const propertyData = {
                 title,
                 address,
                 price,
@@ -106,11 +133,18 @@ export default function PropertyFormModal({ isOpen, onClose, onSuccess }: Proper
                 agent_id: profile.id
             };
 
-            const { error: insertError } = await supabase
-                .from('properties')
-                .insert([newProperty]);
-
-            if (insertError) throw insertError;
+            if (initialData?.id) {
+                const { error: updateError } = await supabase
+                    .from('properties')
+                    .update(propertyData)
+                    .eq('id', initialData.id);
+                if (updateError) throw updateError;
+            } else {
+                const { error: insertError } = await supabase
+                    .from('properties')
+                    .insert([propertyData]);
+                if (insertError) throw insertError;
+            }
 
             // Reset form
             setTitle("");
@@ -148,7 +182,7 @@ export default function PropertyFormModal({ isOpen, onClose, onSuccess }: Proper
                         >
                             <div className="flex items-center justify-between p-6 border-b border-white/10 bg-white/5">
                                 <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                                    <Home className="text-primary" /> Cadastrar Novo Imóvel
+                                    <Home className="text-primary" /> {initialData ? "Editar Imóvel" : "Cadastrar Novo Imóvel"}
                                 </h2>
                                 <button 
                                     onClick={onClose}

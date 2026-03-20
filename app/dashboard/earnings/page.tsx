@@ -52,14 +52,6 @@ export default function EarningsPage() {
             } catch (err) {
                 console.error("Error fetching financial data:", err);
             } finally {
-                // Fallback fictício Premium
-                if (transactions.length === 0) {
-                    setTransactions([
-                        { id: '1', type: 'comissao', amount: 1500.00, status: 'Pago', created_at: new Date().toISOString(), description: 'Comissão Venda: Cobertura Itaim' },
-                        { id: '2', type: 'comissao', amount: 450.00, status: 'Pendente', created_at: new Date().toISOString(), description: 'Indicação: Pedro Santos' },
-                        { id: '3', type: 'saque', amount: -1000.00, status: 'Concluído', created_at: new Date().toISOString(), description: 'Resgate para conta principal' },
-                    ]);
-                }
                 setIsLoading(false);
             }
         };
@@ -93,24 +85,24 @@ export default function EarningsPage() {
                     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass p-6 rounded-2xl relative overflow-hidden group">
                         <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-bl-full translate-x-8 -translate-y-8 blur-2xl group-hover:scale-150 transition-transform duration-700" />
                         <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Saldo Disponível</h3>
-                        <p className="text-3xl font-black text-white">R$ 1.950,00</p>
+                        <p className="text-3xl font-black text-white">R$ 0,00</p>
                         <p className="text-[10px] text-emerald-500 font-bold mt-2 flex items-center gap-1 uppercase">
-                            <ArrowUpRight size={12} /> +12% em relação ao mês anterior
+                            <ArrowUpRight size={12} /> +0% em relação ao mês anterior
                         </p>
                     </motion.div>
 
                     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }} className="glass p-6 rounded-2xl relative overflow-hidden group">
                         <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 rounded-bl-full translate-x-8 -translate-y-8 blur-2xl" />
                         <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Comissões Pendentes</h3>
-                        <p className="text-3xl font-black text-white">R$ 450,00</p>
+                        <p className="text-3xl font-black text-white">R$ 0,00</p>
                         <p className="text-[10px] text-gray-500 font-bold mt-2 uppercase">Aguardando confirmação de pagamento</p>
                     </motion.div>
 
                     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 }} className="glass p-6 rounded-2xl bg-primary/5 border-primary/20">
                         <h3 className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Total Lançado (2026)</h3>
-                        <p className="text-3xl font-black text-white">R$ 12.800,00</p>
+                        <p className="text-3xl font-black text-white">R$ 0,00</p>
                         <div className="mt-3 flex gap-1">
-                            <div className="h-1 flex-1 bg-primary rounded-full" />
+                            <div className="h-1 flex-1 bg-primary/30 rounded-full" />
                             <div className="h-1 flex-1 bg-primary/30 rounded-full" />
                             <div className="h-1 flex-1 bg-primary/30 rounded-full" />
                         </div>

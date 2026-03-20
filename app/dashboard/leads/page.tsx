@@ -3,6 +3,7 @@
 import DashboardShell from "@/components/layout/DashboardShell";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import LeadFormModal from "@/components/leads/LeadFormModal";
 import { 
     Users, 
     Search, 
@@ -15,7 +16,8 @@ import {
     ChevronLeft,
     ChevronRight,
     Loader2,
-    Calendar
+    Calendar,
+    Trash2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -32,33 +34,44 @@ export default function LeadsPage() {
     const [leads, setLeads] = useState<Lead[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
+    const [isAppModalOpen, setAppModalOpen] = useState(false);
+
+    const fetchLeads = async () => {
+        setIsLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('leads')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            if (data) setLeads(data);
+        } catch (err) {
+            console.error("Error fetching leads:", err);
+            setLeads([]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchLeads = async () => {
-            setIsLoading(true);
-            try {
-                const { data, error } = await supabase
-                    .from('leads')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-                if (data) setLeads(data);
-            } catch (err) {
-                console.error("Error fetching leads:", err);
-                // Fallback fictício para demonstração premium
-                setLeads([
-                    { id: '1', full_name: 'Ricardo Almeida', email: 'ricardo@exemplo.com', phone: '(11) 98888-7777', status: 'Novo', created_at: new Date().toISOString() },
-                    { id: '2', full_name: 'Juliana Costa', email: 'juliana@exemplo.com', phone: '(21) 97777-6666', status: 'Em Contato', created_at: new Date().toISOString() },
-                    { id: '3', full_name: 'Marcos Oliveira', email: 'marcos@exemplo.com', phone: '(31) 96666-5555', status: 'Qualificado', created_at: new Date().toISOString() },
-                ]);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         fetchLeads();
     }, []);
+
+    const handleDeleteLead = async (id: string) => {
+        if (!confirm("Tem certeza que deseja apagar este lead?")) return;
+        setIsLoading(true);
+        try {
+            const { error } = await supabase.from('leads').delete().eq('id', id);
+            if (error) throw error;
+            fetchLeads();
+        } catch (err: any) {
+            console.error("Erro ao deletar lead:", err);
+            alert("Erro ao excluir. Tente novamente.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const filteredLeads = leads.filter(lead => 
         lead.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -84,10 +97,21 @@ export default function LeadsPage() {
                         </h1>
                         <p className="text-gray-400 mt-1">Organize seus contatos e transforme interesse em venda.</p>
                     </div>
-                    <button className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 rounded-xl font-bold transition-all shadow-lg shadow-primary/25">
+                    <button 
+                        onClick={() => setAppModalOpen(true)}
+                        className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 rounded-xl font-bold transition-all shadow-lg shadow-primary/25"
+                    >
                         <Plus size={20} /> Adicionar Lead
                     </button>
                 </header>
+                <LeadFormModal 
+                    isOpen={isAppModalOpen} 
+                    onClose={() => setAppModalOpen(false)} 
+                    onSuccess={() => {
+                        setAppModalOpen(false);
+                        fetchLeads();
+                    }} 
+                />
 
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                     <div className="lg:col-span-3 space-y-4">
@@ -102,7 +126,7 @@ export default function LeadsPage() {
                                     className="w-full bg-white/5 border border-white/5 rounded-lg py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                                 />
                             </div>
-                            <button className="p-2.5 glass glass-hover rounded-lg text-gray-400 hover:text-white transition-colors">
+                            <button title="Filtrar" className="p-2.5 glass glass-hover rounded-lg text-gray-400 hover:text-white transition-colors">
                                 <Filter size={18} />
                             </button>
                         </div>
@@ -170,9 +194,18 @@ export default function LeadsPage() {
                                                             </div>
                                                         </td>
                                                         <td className="px-6 py-4 text-right">
-                                                            <button className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-500 hover:text-white">
-                                                                <MoreHorizontal size={20} />
-                                                            </button>
+                                                            <div className="flex items-center justify-end gap-2">
+                                                                <button 
+                                                                    title="Excluir"
+                                                                    onClick={() => handleDeleteLead(lead.id)}
+                                                                    className="p-2 hover:bg-red-500/10 rounded-lg transition-colors text-gray-500 hover:text-red-500"
+                                                                >
+                                                                    <Trash2 size={18} />
+                                                                </button>
+                                                                <button title="Mais Opções" className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-500 hover:text-white">
+                                                                    <MoreHorizontal size={18} />
+                                                                </button>
+                                                            </div>
                                                         </td>
                                                     </motion.tr>
                                                 ))}
@@ -191,10 +224,10 @@ export default function LeadsPage() {
                             <div className="p-4 border-t border-white/5 flex items-center justify-between">
                                 <p className="text-xs text-gray-500 font-medium">Mostrando {filteredLeads.length} de {leads.length} leads</p>
                                 <div className="flex items-center gap-2">
-                                    <button className="p-1.5 glass rounded-lg text-gray-500 hover:text-white disabled:opacity-30" disabled>
+                                    <button title="Página Anterior" className="p-1.5 glass rounded-lg text-gray-500 hover:text-white disabled:opacity-30" disabled>
                                         <ChevronLeft size={18} />
                                     </button>
-                                    <button className="p-1.5 glass rounded-lg text-gray-500 hover:text-white disabled:opacity-30" disabled>
+                                    <button title="Próxima Página" className="p-1.5 glass rounded-lg text-gray-500 hover:text-white disabled:opacity-30" disabled>
                                         <ChevronRight size={18} />
                                     </button>
                                 </div>

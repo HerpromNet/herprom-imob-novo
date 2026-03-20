@@ -12,11 +12,12 @@ import {
     Bed, 
     Bath, 
     Square, 
-    Tag, 
     ChevronRight,
     Loader2,
     Filter,
-    Camera
+    Camera,
+    Trash2,
+    Edit2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -38,6 +39,7 @@ export default function PropertiesPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [isAppModalOpen, setAppModalOpen] = useState(false);
+    const [editingProperty, setEditingProperty] = useState<Property | null>(null);
 
     const fetchProperties = async () => {
         setIsLoading(true);
@@ -51,12 +53,7 @@ export default function PropertiesPage() {
             if (data) setProperties(data);
         } catch (err) {
             console.error("Error fetching properties:", err);
-            // Fallback fictício Premium
-            setProperties([
-                { id: '1', title: 'Cobertura Duplex no Itaim', address: 'Rua Amauri, Itaim Bibi - SP', price: 'R$ 4.500.000', bedrooms: 4, bathrooms: 5, area: 320, type: 'Apartamento', status: 'Venda' },
-                { id: '2', title: 'Casa de Condomínio Alpha 1', address: 'Alphaville, Barueri - SP', price: 'R$ 7.200.000', bedrooms: 5, bathrooms: 7, area: 650, type: 'Casa', status: 'Venda' },
-                { id: '3', title: 'Flat Design Moema', address: 'Av. Lavandisca, Moema - SP', price: 'R$ 8.500 /mês', bedrooms: 1, bathrooms: 1, area: 45, type: 'Flat', status: 'Aluguel' },
-            ]);
+            setProperties([]);
         } finally {
             setIsLoading(false);
         }
@@ -65,6 +62,23 @@ export default function PropertiesPage() {
     useEffect(() => {
         fetchProperties();
     }, []);
+
+    const handleDeleteProperty = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation(); // Impede o clique no card de disparar outros eventos
+        if (!confirm("Tem certeza que deseja apagar este imóvel permanentemente?")) return;
+        
+        setIsLoading(true);
+        try {
+            const { error } = await supabase.from('properties').delete().eq('id', id);
+            if (error) throw error;
+            fetchProperties();
+        } catch (err: any) {
+            console.error("Erro ao deletar imóvel:", err);
+            alert("Erro ao excluir. Tente novamente.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const filteredProperties = properties.filter(p => 
         p.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -90,9 +104,14 @@ export default function PropertiesPage() {
                 </header>
                 <PropertyFormModal 
                     isOpen={isAppModalOpen} 
-                    onClose={() => setAppModalOpen(false)} 
+                    initialData={editingProperty}
+                    onClose={() => {
+                        setAppModalOpen(false);
+                        setEditingProperty(null);
+                    }} 
                     onSuccess={() => {
                         setAppModalOpen(false);
+                        setEditingProperty(null);
                         fetchProperties();
                     }} 
                 />
@@ -132,13 +151,33 @@ export default function PropertiesPage() {
                                     <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-white/10 to-transparent">
                                         <Camera className="text-gray-600 scale-150 opacity-30" />
                                     </div>
-                                    <div className="absolute top-4 left-4 flex gap-2">
+                                    <div className="absolute top-4 left-4 flex gap-2 z-10">
                                         <span className="px-3 py-1 bg-primary text-white text-[10px] font-bold uppercase rounded-full shadow-lg">
                                             {p.status}
                                         </span>
                                         <span className="px-3 py-1 bg-[#020617]/80 backdrop-blur-md text-white text-[10px] font-bold uppercase rounded-full border border-white/10">
                                             {p.type}
                                         </span>
+                                    </div>
+                                    <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+                                        <button 
+                                            title="Editar Imóvel"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setEditingProperty(p);
+                                                setAppModalOpen(true);
+                                            }}
+                                            className="p-2 bg-indigo-500/80 hover:bg-indigo-500 backdrop-blur-md text-white rounded-full shadow-lg transition-transform hover:scale-110"
+                                        >
+                                            <Edit2 size={16} />
+                                        </button>
+                                        <button 
+                                            title="Excluir Imóvel"
+                                            onClick={(e) => handleDeleteProperty(p.id, e)}
+                                            className="p-2 bg-red-500/80 hover:bg-red-500 backdrop-blur-md text-white rounded-full shadow-lg transition-transform hover:scale-110"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
                                     </div>
                                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                         <span className="bg-white text-[#020617] p-3 rounded-full font-bold shadow-2xl scale-0 group-hover:scale-100 transition-transform duration-300">

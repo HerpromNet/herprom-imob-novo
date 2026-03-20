@@ -82,13 +82,8 @@ export default function AdminMasterPage() {
             }
         } catch (err) {
             console.error("Error fetching admin data:", err);
-            // Fallback para visualização do dono
-            setUsers([
-                { id: '1', full_name: 'Corretor VIP 01', email: 'vip@exemplo.com', plan: 'Pro', status: 'Ativo', created_at: new Date().toISOString(), is_admin: false },
-                { id: '2', full_name: 'Imobiliária Central', email: 'admin@central.com', plan: 'Master Admin', status: 'Ativo', created_at: new Date().toISOString(), is_admin: true },
-                { id: '3', full_name: 'Teste Gratuito 01', email: 'teste@exemplo.com', plan: 'Teste Gratuito', status: 'Inativo', created_at: new Date().toISOString(), is_admin: false },
-            ]);
-            setStats({ totalUsers: 342, activeSubs: 128, mrr: 18816, growth: 22 });
+            setUsers([]);
+            setStats({ totalUsers: 0, activeSubs: 0, mrr: 0, growth: 0 });
         } finally {
             setIsLoading(false);
         }
